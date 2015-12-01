@@ -15,9 +15,11 @@ public class MainActivity extends AppCompatActivity {
 
         WebView myWebView = (WebView) findViewById(R.id.webView);
         myWebView.setWebViewClient(new MyWebViewClient());
-                myWebView.loadUrl("http://charsheet.su");
         WebSettings webSettings = myWebView.getSettings();
         webSettings.setJavaScriptEnabled(true);
+        myWebView.getSettings().setBuiltInZoomControls(true);
+        myWebView.getSettings().setDisplayZoomControls(false);
+        myWebView.loadUrl("http://charsheet.su");
     }
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
