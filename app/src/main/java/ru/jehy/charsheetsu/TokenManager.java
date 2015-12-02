@@ -16,9 +16,12 @@ public class TokenManager {
                 .getDefaultSharedPreferences(mContext);
         //if(!settings.contains(KEY))
         //    return null;
-        String auth_token_string = settings.getString(KEY, ""/*default value*/);
-        Log.d("TokenManager", "Got token " + auth_token_string);
-        return auth_token_string;
+        String access_token = settings.getString(KEY, null);
+        if (access_token == null)
+            Log.d("TokenManager", "No token stored! ");
+        else
+            Log.d("TokenManager", "Got token " + access_token);
+        return access_token;
     }
 
     static void put(Context mContext, String token) {

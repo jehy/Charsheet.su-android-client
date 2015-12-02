@@ -16,7 +16,7 @@ import com.google.android.gms.auth.UserRecoverableAuthException;
 class AsyncGetToken extends AsyncTask<Void, Void, String> {
     String SCOPE = "oauth2:https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email";
     String mEmail = "";
-    Context mContext;
+    Context mContext = null;
 
     /**
      * Override this method to perform a computation on a background thread. The
@@ -26,7 +26,8 @@ class AsyncGetToken extends AsyncTask<Void, Void, String> {
      * This method can call {@link #publishProgress} to publish updates
      * on the UI thread.
      *
-     * @param params The parameters of the task.
+     * @param Email           Email to get token for.
+     * @param ActivityContext Activity context.
      * @return A result, defined by the subclass of this task.
      * @see #onPreExecute()
      * @see #onPostExecute
@@ -35,6 +36,7 @@ class AsyncGetToken extends AsyncTask<Void, Void, String> {
     public AsyncGetToken(String Email, Context ActivityContext) {
         mEmail = Email;
         mContext = ActivityContext;
+        Log.d("AsyncGetToken", "Getting token for email " + Email);
     }
 
     @Override
@@ -44,7 +46,7 @@ class AsyncGetToken extends AsyncTask<Void, Void, String> {
         String token = "";
         try {
             token = GoogleAuthUtil.getToken(mContext, mEmail, SCOPE);
-            TokenManager.put(mContext,token);
+            TokenManager.put(mContext, token);
             Log.d("GetToken", token);
             //Toast.makeText(this, token, Toast.LENGTH_SHORT).show();
             String info = "https://www.googleapis.com/oauth2/v1/userinfo?access_token=" + token;
@@ -72,7 +74,7 @@ class AsyncGetToken extends AsyncTask<Void, Void, String> {
      * <p/>
      * <p>This method won't be invoked if the task was cancelled.</p>
      *
-     * @param result The result of the operation computed by {@link #doInBackground}.
+     * @param token resulted token.
      * @see #onPreExecute
      * @see #doInBackground
      * @see #onCancelled(Object)

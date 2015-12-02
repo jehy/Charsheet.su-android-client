@@ -29,7 +29,8 @@ class AsyncCheckToken extends AsyncTask<Void, Void, Boolean> {
      * This method can call {@link #publishProgress} to publish updates
      * on the UI thread.
      *
-     * @param params The parameters of the task.
+     * @param ActivityContext activity context.
+     * @param token           token to validate.
      * @return A result, defined by the subclass of this task.
      * @see #onPreExecute()
      * @see #onPostExecute
@@ -48,12 +49,12 @@ class AsyncCheckToken extends AsyncTask<Void, Void, Boolean> {
         boolean TokenGood = false;
         try {
             String url = "https://www.googleapis.com/oauth2/v1/userinfo?access_token=" + mToken;
-            Log.d("CheckToken", "fetching url "+url);
+            Log.d("CheckToken", "fetching url " + url);
             String info = Util.file_get_contents(url);
             if (info != null)
                 return Util.CheckEmailInJson(info);
         } catch (Exception e) {
-            Log.d("CheckToken", e.getMessage());
+            Log.d("CheckToken", "Exception fetching from server and parsing: " + e.toString());
             //Toast.makeText(this, R.string.failed_login, Toast.LENGTH_SHORT).show();
             //Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
 
@@ -67,7 +68,7 @@ class AsyncCheckToken extends AsyncTask<Void, Void, Boolean> {
      * <p/>
      * <p>This method won't be invoked if the task was cancelled.</p>
      *
-     * @param result The result of the operation computed by {@link #doInBackground}.
+     * @param TokenGood if token is really good.
      * @see #onPreExecute
      * @see #doInBackground
      * @see #onCancelled(Object)

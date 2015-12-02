@@ -18,6 +18,7 @@ public class MainActivity extends AppCompatActivity {
     String mEmail; // Received from newChooseAccountIntent(); passed to getToken()
 
     public void pickUserAccount() {
+        Log.d("pickUserAccount", "Forcing user to select account");
         String[] accountTypes = new String[]{"com.google"};
         Intent intent = AccountPicker.newChooseAccountIntent(null, null,
                 accountTypes, false, null, null, null, null);
@@ -29,7 +30,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         String access_token = TokenManager.get(this);
-        if (access_token == null || access_token.length() == 0)
+        if (access_token == null)
             pickUserAccount();
         else {
             new AsyncCheckToken(this, access_token).execute();
@@ -67,6 +68,7 @@ public class MainActivity extends AppCompatActivity {
                 // The account picker dialog closed without selecting an account.
                 // Notify users that they must pick an account to proceed.
                 Toast.makeText(this, R.string.pick_account, Toast.LENGTH_SHORT).show();
+                pickUserAccount();
             }
         }
         // Handle the result from exceptions

@@ -1,5 +1,5 @@
 <resources>
     <string name="app_name">Charsheet.su</string>
-    <string name="pick_account">Choose an account</string>
+    <string name="pick_account">Please choose an account to continue</string>
     <string name="failed_login">Failed to login!</string>
 </resources>

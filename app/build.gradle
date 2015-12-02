@@ -1,19 +1,18 @@
 apply plugin: 'com.android.application'
 
 android {
-    useLibrary 'org.apache.http.legacy'
     compileSdkVersion 23
     buildToolsVersion "23.0.1"
     defaultConfig {
         applicationId "ru.jehy.charsheetsu"
         minSdkVersion 15
         targetSdkVersion 23
-        versionName '1.21'
-        versionCode 4
+        versionName '1.23'
+        versionCode 6
     }
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }

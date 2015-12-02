@@ -2,16 +2,11 @@ package ru.jehy.charsheetsu;
 
 import android.util.Log;
 
-import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.params.BasicHttpParams;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -19,55 +14,86 @@ import org.json.JSONObject;
  * Created by Bond on 01-Dec-15.
  */
 public class Util {
-    static String file_get_contents(String url) {
-        Log.d("file_get_contents", "getting url "+url);
-        String result = null;
-        DefaultHttpClient httpclient = new DefaultHttpClient(new BasicHttpParams());
-        HttpGet httppost = new HttpGet(url);
-// Depends on your web service
-        //httppost.setHeader("Content-type", "application/json");
+    private static final int BUFFER_SIZE = 512;
 
-        InputStream inputStream = null;
-        try {
-            HttpResponse response = httpclient.execute(httppost);
-            HttpEntity entity = response.getEntity();
+    /**
+     * Downloads a file from a URL
+     *
+     * @param fileURL HTTP URL of the file to be downloaded
+     * @throws Exception
+     */
+    public static String file_get_contents(String fileURL)
+            throws Exception {
 
-            inputStream = entity.getContent();
-            // json is UTF-8 by default
-            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"), 8);
-            StringBuilder sb = new StringBuilder();
+        Log.d("file_get_contents", "getting url " + fileURL);
+        String result = "";
+        URL url = new URL(fileURL);
+        HttpURLConnection httpConn = (HttpURLConnection) url.openConnection();
+        int responseCode = httpConn.getResponseCode();
 
-            String line = null;
-            while ((line = reader.readLine()) != null) {
-                sb.append(line + "\n");
+        // always check HTTP response code first
+        if (responseCode == HttpURLConnection.HTTP_OK) {
+            String fileName = "";
+            String disposition = httpConn.getHeaderField("Content-Disposition");
+            String contentType = httpConn.getContentType();
+            int contentLength = httpConn.getContentLength();
+
+            if (disposition != null) {
+                // extracts file name from header field
+                int index = disposition.indexOf("filename=");
+                if (index > 0) {
+                    fileName = disposition.substring(index + 10,
+                            disposition.length() - 1);
+                }
+            } else {
+                // extracts file name from URL
+                fileName = fileURL.substring(fileURL.lastIndexOf("/") + 1,
+                        fileURL.length());
             }
-            result = sb.toString();
-        } catch (Exception e) {
-            Log.d("file_get_contents", e.getMessage());
-            // Oops
-        } finally {
-            try {
-                if (inputStream != null) inputStream.close();
-            } catch (Exception squish) {
-                Log.d("file_get_contents", squish.getMessage());
+
+            Log.d("file_get_contents", "Content-Type = " + contentType);
+            Log.d("file_get_contents", "Content-Disposition = " + disposition);
+            Log.d("file_get_contents", "Content-Length = " + contentLength);
+            Log.d("file_get_contents", "fileName = " + fileName);
+
+            // opens input stream from the HTTP connection
+            InputStream inputStream = httpConn.getInputStream();
+
+            int bytesRead = -1;
+            byte[] buffer = new byte[BUFFER_SIZE];
+            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                Log.d("file_get_contents", "bytes read: " + bytesRead);
+                String bufferString = new String(buffer, 0, bytesRead, "UTF-8");
+                Log.d("file_get_contents", "buffer string: " + bufferString);
+                result = result.concat(bufferString);
+                //outputStream.write(buffer, 0, bytesRead);
             }
+
+            //outputStream.close();
+            inputStream.close();
+
+            Log.d("file_get_contents", "File downloaded");
+        } else {
+            Log.d("file_get_contents", "No file to download. Server replied HTTP code: " + responseCode);
         }
-        Log.d("file_get_contents", "returning "+result);
+        httpConn.disconnect();
+
+        Log.d("file_get_contents", "returning " + result);
         return result;
     }
 
     static boolean CheckEmailInJson(String result) {
         try {
-            Log.d("CheckEmailInJson", "input value: "+result);
+            Log.d("CheckEmailInJson", "input value: " + result);
             JSONObject jObject = new JSONObject(result);
             String aJsonString = jObject.getString("email");
             if (aJsonString != null) {
-                Log.d("CheckEmailInJson", "token is valid "+aJsonString);
+                Log.d("CheckEmailInJson", "token is valid, email is " + aJsonString);
                 return true;
             }
 
         } catch (JSONException e) {
-            Log.d("CheckEmailInJson", "exception: "+e.getMessage());
+            Log.d("CheckEmailInJson", "exception: " + e.getMessage());
             // Oops
         }
         Log.d("CheckEmailInJson", "token is invalid");
